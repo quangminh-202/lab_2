@@ -1,0 +1,8 @@
+
+*.log
+.vs
+x64
+.vcxproj
+node_modules/
+config.json
+tmp/*
