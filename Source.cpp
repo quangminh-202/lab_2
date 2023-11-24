@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib> // Для использования rand()
+#include <algorithm>
 
 using namespace std;
 template <typename T>
@@ -14,35 +15,46 @@ template <typename T>
 class LinkedList {
 private:
     Node<T>* _head;
-    
+
 public:
     // Конструктор 	по умолчанию.
     LinkedList() : _head(nullptr) {}
 
 
-    //Конструктор 	копирования
-    LinkedList(const LinkedList& other) {
-        copyList(other);
+    //Конструктор копирования
+    LinkedList(const LinkedList& other) :_head(nullptr) {
+        Node<T>* otherCurrent = other._head;
+        while (otherCurrent) {
+            push_tail(otherCurrent->data);
+            otherCurrent = otherCurrent->next;
+        }
     }
-    
-    //Конструктор, 	заполняющий список случайными значениями согласно заданию.
+
+    //Конструктор, заполняющий список случайными значениями согласно заданию.
     LinkedList(int size) : _head(nullptr) {
         for (int i = 0; i < size; ++i) {
             push_tail(rand() % 100); // случайные значения от 0 до 99
         }
     }
 
-    //Деструктор
+    // Деструктор
     ~LinkedList() {
-        clear();
+        Node<T>* current = _head;
+        while (current) {
+            Node<T>* next = current->next;
+            delete current;
+            current = next;
+        }
+        _head = nullptr;
     }
 
+    void swap(LinkedList& other) noexcept {
+        std::swap(_head, other._head);
+    }
     // Операция присваивания
     LinkedList& operator=(const LinkedList& other) {
-        if (this != &other) {
-            clear();
-            copyList(other);
-        }
+        LinkedList temp(other);
+        swap(temp);
         return *this;
     }
 
@@ -60,7 +72,6 @@ public:
             current->next = newNode;
         }
     }
-
 
     //Добавление другого списка LinkedList в конец списка — push_tail(перегруженный метод).
     void push_tail(const LinkedList& other) {
@@ -168,60 +179,45 @@ public:
         return current->data;
     }
 
-    // Оператор вывода списка на печать в обратном порядке
-    friend std::ostream& operator<<(std::ostream& os, const LinkedList& list) {
-        printReverse(os, list._head);
-        return os;
+    Node<T>* get_head() const {
+        return _head;
     }
 
-    void reverse() {
-        Node<T>* previous = nullptr;
-        Node<T>* current = _head;
-        Node<T>* next = nullptr;
-
-        while (current) {
-            next = current->next;
-            current->next = previous;
-            previous = current;
-            current = next;
-        }
-
-        _head = previous;
-    }
-
-    void copyList(const LinkedList& other) {
-        if (!other._head) {
-            _head = nullptr;
-            return;
-        }
-
-        _head = new Node<T>(other._head->data);
-        Node<T>* current = _head;
-        Node<T>* otherCurrent = other._head->next;
-
-        while (otherCurrent) {
-            current->next = new Node<T>(otherCurrent->data);
-            current = current->next;
-            otherCurrent = otherCurrent->next;
-        }
-    }
-
-    void clear() {
-        while (_head) {
-            pop_head();
-        }
-    }
-
-    // Рекурсивный метод для печати списка в обратном порядке
-    static void printReverse(std::ostream& os, const Node<T>* current) {
-        if (!current) {
-            return;
-        }
-
-        printReverse(os, current->next);
-        os << current->data << " ";
-    }
 };
+
+
+// Оператор вывода списка на печать в обратном порядке
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const LinkedList<T>& list) {
+    printListReverse(os, list.get_head());
+    return os;
+}
+
+template <typename T>
+void reverseList(LinkedList<T>& list) {
+    Node<T>* previous = nullptr;
+    Node<T>* current = list.get_head();
+    Node<T>* next = nullptr;
+
+    while (current) {
+        next = current->next;
+        current->next = previous;
+        previous = current;
+        current = next;
+    }
+
+    list.get_head() = previous;
+}
+
+template <typename T>
+void printListReverse(std::ostream& os, Node<T>* current) {
+    if (!current) {
+        return;
+    }
+
+    printListReverse(os, current->next);
+    os << current->data << " ";
+}
 
 int main() {
     // Пример использования
