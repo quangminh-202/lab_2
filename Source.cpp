@@ -91,14 +91,9 @@ public:
 
     //Добавление списка LinkedList 	в начало списка — push_head(перегруженный метод).
     void push_head(const LinkedList& other) {
-        if (other._head == nullptr) {
-            return;
-        }
-        Node<T>* currentOther = other._head;
-        while (currentOther) {
-            push_head(currentOther->data);
-            currentOther = currentOther->next;
-        }
+        auto new_list = other;
+        new_list.push_tail(*this);
+        *this = new_list;
     }
 
     //Удаление элемента из начала списка — pop_head.
@@ -221,15 +216,26 @@ void printListReverse(std::ostream& os, Node<T>* current) {
 
 int main() {
     // Пример использования
+    //list: -1 0 1 2 3 
     LinkedList<int> list;
     list.push_tail(1);
     list.push_tail(2);
     list.push_tail(3);
     list.push_head(0);
     list.push_head(-1);
-    //now:    -1 0 1 2 3 
-    //reverse: 3 2 1 0 -1
+    //list1: 1 2 3 4
+    LinkedList<int> list1;
+    list1.push_tail(1);
+    list1.push_tail(2);
+    list1.push_tail(3);
+    list1.push_tail(4);
+
+    //list1: (-1 0 1 2 3) (1 2 3 4)
+    list1.push_head(list);
     std::cout << "Reverse List: " << list << std::endl;
+    //Reverse List: 3 2 1 0 -1
+    std::cout << "Reverse List 1: " << list1 << std::endl;
+    //Reverse List 1 : (4 3 2 1) (3 2 1 0 - 1)
 
     LinkedList<int> randomList(5);
     std::cout << "Random List: " << randomList << std::endl;
